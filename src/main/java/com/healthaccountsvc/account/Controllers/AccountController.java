@@ -1,12 +1,13 @@
 package com.healthaccountsvc.account.Controllers;
 
+import com.healthaccountsvc.account.DTO.AccountInfoAddDTO;
 import com.healthaccountsvc.account.DTO.ApiResponseDTO;
+import com.healthaccountsvc.account.DTO.ResponseBasicDTO;
 import com.healthaccountsvc.account.Services.AccountService;
 import com.healthaccountsvc.account.Util.Meta;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -23,5 +24,17 @@ public class AccountController {
     @GetMapping("/test")
     public ApiResponseDTO testService(){
         return new ApiResponseDTO(metaOk, accountService.pruebaConexion());
+    }
+
+    @PostMapping("/cuenta")
+    public ApiResponseDTO agregarCuenta(@RequestBody @Valid AccountInfoAddDTO accountInfo){
+        ResponseBasicDTO response = accountService.agregarCuenta(accountInfo);
+        if(response.getStatus() == 1){
+            return new ApiResponseDTO(metaOk, response.getMensaje());
+        }else if(response.getStatus() == 0){
+            return new ApiResponseDTO(metaNotFound, response.getMensaje());
+        }else{
+            return new ApiResponseDTO(metaServerError, response.getMensaje());
+        }
     }
 }

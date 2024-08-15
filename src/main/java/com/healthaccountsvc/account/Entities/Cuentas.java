@@ -2,6 +2,7 @@ package com.healthaccountsvc.account.Entities;
 
 import ch.qos.logback.core.joran.spi.DefaultClass;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,13 +15,17 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
-@Entity
+@Entity(name = "cuenta")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Cuentas {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    @NotNull
+    @NotEmpty
+    private String nombre;
     @NotNull
     @ColumnDefault("")
     private String icono;
@@ -28,13 +33,8 @@ public class Cuentas {
     private float cantidad;
     @OneToOne
     @JoinColumn(name = "id")
-    private Usuarios idUsuario;
+    private Usuarios id_usuario;
     @NotNull
     @ColumnDefault("0")
     private int activo;
-    @NotNull
-    @CreatedDate
-    private Instant fechaCreacion;
-    @LastModifiedDate
-    private Instant fechaModificacion;
 }
