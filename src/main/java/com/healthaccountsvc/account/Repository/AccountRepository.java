@@ -22,4 +22,17 @@ public interface AccountRepository extends JpaRepository<Cuentas, Integer> {
     @Modifying(clearAutomatically = true)
     @Query(value = "INSERT INTO cuenta (nombre, icono, cantidad, id_usuario) VALUES (:nombre, :icono, :cantidad, :usuario)", nativeQuery = true)
     void saveAccount(@Param("nombre") String nombre, @Param("icono") String icono, @Param("cantidad") float cantidad, @Param("usuario") int usuario);
+
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query(value = "UPDATE cuenta SET nombre = :nombre, icono = :icono, cantidad = :cantidad WHERE id = :id AND id_usuario = :usuario", nativeQuery = true)
+    void updateAccount(@Param("nombre") String nombre, @Param("icono") String icono, @Param("cantidad") float cantidad, @Param("id") int id, @Param("usuario") int usuario);
+
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query(value = "UPDATE cuenta SET activo = 1 WHERE id = :id AND id_usuario = :usuario", nativeQuery = true)
+    void deleteAccount(@Param("id") int id, @Param("usuario") int usuario);
+
+    @Query(value = "SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM cuenta a WHERE id = :id AND id_usuario = :usuario AND activo = 0", nativeQuery = true)
+    boolean existsAccountActive(@Param("id") int id, @Param("usuario") int usuario);
 }

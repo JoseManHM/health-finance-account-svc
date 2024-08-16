@@ -1,6 +1,7 @@
 package com.healthaccountsvc.account.Services.Impl;
 
 import com.healthaccountsvc.account.DTO.AccountInfoAddDTO;
+import com.healthaccountsvc.account.DTO.AccountInfoUpdateDTO;
 import com.healthaccountsvc.account.DTO.ResponseBasicDTO;
 import com.healthaccountsvc.account.Entities.Cuentas;
 import com.healthaccountsvc.account.Entities.Usuarios;
@@ -11,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -53,6 +53,63 @@ public class AccountServiceImpl implements AccountService {
             }
         }catch (Exception e){
             String error = "Ocurrio un error al crear la cuenta: " + e.getMessage();
+            log.error(error);
+            System.out.println(error);
+            response.setStatus(-1);
+            response.setMensaje(error);
+        }
+        return response;
+    }
+
+    @Override
+    public ResponseBasicDTO modificarCuenta(AccountInfoUpdateDTO accountInfo){
+        ResponseBasicDTO response = new ResponseBasicDTO();
+        try{
+            Usuarios userData = userRepository.findById(accountInfo.getIdUsuario()).orElse(null);
+            if(userData != null){
+                Cuentas cuentaData = accountRepository.findById(accountInfo.getId()).orElse(null);
+                if(cuentaData != null){
+                    accountRepository.updateAccount(accountInfo.getNombre(), accountInfo.getIcono(), accountInfo.getCantidad(), accountInfo.getId(), accountInfo.getIdUsuario());
+                    response.setStatus(1);
+                    response.setMensaje("La cuenta ha sido actualizada correctamente");
+                }else{
+                    response.setStatus(0);
+                    response.setMensaje("La cuenta que se quiere modificar no existe");
+                }
+            }else{
+                response.setStatus(0);
+                response.setMensaje("El usuario asociado a la cuenta no existe");
+            }
+        }catch (Exception e){
+            String error = "Ocurrio un error al modificar la cuenta: " + e.getMessage();
+            log.error(error);
+            System.out.println(error);
+            response.setStatus(-1);
+            response.setMensaje(error);
+        }
+        return response;
+    }
+
+    @Override
+    public ResponseBasicDTO eliminarCuenta(int id, int usuario){
+        ResponseBasicDTO response = new ResponseBasicDTO();
+        try{
+            Usuarios userExists = userRepository.findById(usuario).orElse(null);
+            if(userExists != null){
+                if(accountRepository.existsAccountActive(id, usuario)){
+                    accountRepository.deleteAccount(id, usuario);
+                    response.setStatus(1);
+                    response.setMensaje("La cuenta se ha eliminado correctamente");
+                }else{
+                    response.setStatus(0);
+                    response.setMensaje("La cuenta que se quiere eliminar no existe");
+                }
+            }else{
+                response.setStatus(0);
+                response.setMensaje("El usuario asociado a la cuenta no existe");
+            }
+        }catch (Exception e){
+            String error = "Ocurrio un error al eliminar la cuenta: " + e.getMessage();
             log.error(error);
             System.out.println(error);
             response.setStatus(-1);

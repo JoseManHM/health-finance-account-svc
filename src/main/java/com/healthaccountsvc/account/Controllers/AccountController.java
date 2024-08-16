@@ -1,6 +1,7 @@
 package com.healthaccountsvc.account.Controllers;
 
 import com.healthaccountsvc.account.DTO.AccountInfoAddDTO;
+import com.healthaccountsvc.account.DTO.AccountInfoUpdateDTO;
 import com.healthaccountsvc.account.DTO.ApiResponseDTO;
 import com.healthaccountsvc.account.DTO.ResponseBasicDTO;
 import com.healthaccountsvc.account.Services.AccountService;
@@ -29,6 +30,30 @@ public class AccountController {
     @PostMapping("/cuenta")
     public ApiResponseDTO agregarCuenta(@RequestBody @Valid AccountInfoAddDTO accountInfo){
         ResponseBasicDTO response = accountService.agregarCuenta(accountInfo);
+        if(response.getStatus() == 1){
+            return new ApiResponseDTO(metaOk, response.getMensaje());
+        }else if(response.getStatus() == 0){
+            return new ApiResponseDTO(metaNotFound, response.getMensaje());
+        }else{
+            return new ApiResponseDTO(metaServerError, response.getMensaje());
+        }
+    }
+
+    @PutMapping("/cuenta")
+    public ApiResponseDTO modificarCuenta(@RequestBody @Valid AccountInfoUpdateDTO accountInfo){
+        ResponseBasicDTO response = accountService.modificarCuenta(accountInfo);
+        if(response.getStatus() == 1){
+            return new ApiResponseDTO(metaOk, response.getMensaje());
+        }else if(response.getStatus() == 0){
+            return new ApiResponseDTO(metaNotFound, response.getMensaje());
+        }else{
+            return new ApiResponseDTO(metaServerError, response.getMensaje());
+        }
+    }
+
+    @DeleteMapping("/cuenta/{id}/{usuario}")
+    public ApiResponseDTO eliminarCuenta(@PathVariable(name = "id") int id, @PathVariable(name = "usuario") int usuario){
+        ResponseBasicDTO response = accountService.eliminarCuenta(id, usuario);
         if(response.getStatus() == 1){
             return new ApiResponseDTO(metaOk, response.getMensaje());
         }else if(response.getStatus() == 0){
