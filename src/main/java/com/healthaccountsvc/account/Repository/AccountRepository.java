@@ -1,5 +1,6 @@
 package com.healthaccountsvc.account.Repository;
 
+import com.healthaccountsvc.account.DTO.GetAccountDataProjection;
 import com.healthaccountsvc.account.Entities.Cuentas;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.util.List;
 
 @Repository
 public interface AccountRepository extends JpaRepository<Cuentas, Integer> {
@@ -35,4 +37,20 @@ public interface AccountRepository extends JpaRepository<Cuentas, Integer> {
 
     @Query(value = "SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM cuenta a WHERE id = :id AND id_usuario = :usuario AND activo = 0", nativeQuery = true)
     boolean existsAccountActive(@Param("id") int id, @Param("usuario") int usuario);
+
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query(value = "UPDATE cuenta SET cantidad = cantidad + :monto WHERE id = :id", nativeQuery = true)
+    void sumarCantidadCuenta(@Param("monto") float monto, @Param("id") int id);
+
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query(value = "UPDATE cuenta SET cantidad = cantidad - :monto WHERE id = :id", nativeQuery = true)
+    void restarCantidadCuenta(@Param("monto") float monto, @Param("id") int id);
+
+    @Query(value = "SELECT id, nombre, icono, cantidad, id_usuario FROM cuenta WHERE id_usuario = :usuario AND activo = 0", nativeQuery = true)
+    List<GetAccountDataProjection> findAllAccounts(@Param("usuario") int usuario);
+
+    @Query(value = "SELECT id, nombre, icono, cantidad, id_usuario FROM cuenta WHERE id = :id AND id_usuario = :usuario AND activo = 0 LIMIT 1", nativeQuery = true)
+    List<GetAccountDataProjection> findAccount(@Param("id") int id, @Param("usuario") int usuario);
 }

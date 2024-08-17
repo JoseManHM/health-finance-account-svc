@@ -1,9 +1,9 @@
 package com.healthaccountsvc.account.Services;
 
-import com.healthaccountsvc.account.DTO.AccountInfoAddDTO;
-import com.healthaccountsvc.account.DTO.AccountInfoUpdateDTO;
-import com.healthaccountsvc.account.DTO.ResponseBasicDTO;
+import com.healthaccountsvc.account.DTO.*;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public interface AccountService {
@@ -11,4 +11,7 @@ public interface AccountService {
     ResponseBasicDTO agregarCuenta(AccountInfoAddDTO accountInfo);
     ResponseBasicDTO modificarCuenta(AccountInfoUpdateDTO accountInfo);
     ResponseBasicDTO eliminarCuenta(int id, int usuario);
+    ResponseBasicDTO addTransferenciaCuenta(AccountInfoTransferDTO accountInfo);
+    List<GetAccountDataProjection> obtenerAllCuentas(int usuario);
+    List<GetAccountDataProjection> obtenerAccount(int id, int usuario);
 }

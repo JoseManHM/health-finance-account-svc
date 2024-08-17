@@ -1,17 +1,19 @@
 package com.healthaccountsvc.account.Services.Impl;
 
-import com.healthaccountsvc.account.DTO.AccountInfoAddDTO;
-import com.healthaccountsvc.account.DTO.AccountInfoUpdateDTO;
-import com.healthaccountsvc.account.DTO.ResponseBasicDTO;
+import com.healthaccountsvc.account.DTO.*;
 import com.healthaccountsvc.account.Entities.Cuentas;
 import com.healthaccountsvc.account.Entities.Usuarios;
 import com.healthaccountsvc.account.Repository.AccountRepository;
 import com.healthaccountsvc.account.Repository.UserRepository;
 import com.healthaccountsvc.account.Services.AccountService;
+import org.apache.coyote.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -115,6 +117,78 @@ public class AccountServiceImpl implements AccountService {
             response.setStatus(-1);
             response.setMensaje(error);
         }
+        return response;
+    }
+
+    @Override
+    public ResponseBasicDTO addTransferenciaCuenta(AccountInfoTransferDTO accountInfo){
+        ResponseBasicDTO response = new ResponseBasicDTO();
+        try{
+            if(userRepository.existsById(accountInfo.getIdUsuario())){
+                if(accountRepository.existsAccountActive(accountInfo.getIdOrigen(), accountInfo.getIdUsuario())){
+                    if(accountRepository.existsAccountActive(accountInfo.getIdDestino(), accountInfo.getIdUsuario())){
+                        accountRepository.restarCantidadCuenta(accountInfo.getMonto(), accountInfo.getIdOrigen());
+                        accountRepository.sumarCantidadCuenta(accountInfo.getMonto(), accountInfo.getIdDestino());
+                        response.setStatus(1);
+                        response.setMensaje("Se ha realizado correctamente las transferencias entre cuentas");
+                    }else{
+                        response.setStatus(0);
+                        response.setMensaje("La cuenta destino no existe o se encuentra inactiva");
+                    }
+                }else{
+                    response.setStatus(0);
+                    response.setMensaje("La cuenta origen no existe o se encuentra inactiva");
+                }
+            }else{
+                response.setStatus(0);
+                response.setMensaje("El usuario asociado a las cuentas no existe");
+            }
+        }catch (Exception e){
+            String error = "Ocurrio un error al realizar la transferencia entre cuentas: " + e.getMessage();
+            log.error(error);
+            System.out.println(error);
+            response.setStatus(-1);
+            response.setMensaje(error);
+        }
+        return response;
+    }
+    
+    @Override
+    public List<GetAccountDataProjection> obtenerAllCuentas(int usuario){
+        List<GetAccountDataProjection> response = new ArrayList<>();
+        try{
+            if(userRepository.existsById(usuario)){
+                response = accountRepository.findAllAccounts(usuario);
+            }else{
+                throw new Exception("El usuario no existe");
+            }
+        }catch (Exception e){
+            String error = "Ocurrio un error al obtener todas las cuentas del usuario: " + e.getMessage();
+            log.error(error);
+            System.out.println(error);
+        }
+        return response;
+    }
+
+    @Override
+    public List<GetAccountDataProjection> obtenerAccount(int id, int usuario){
+        List<GetAccountDataProjection> response = new ArrayList<>();
+        try{
+            if(userRepository.existsById(usuario)){
+                if(accountRepository.existsById(id)){
+                    response = accountRepository.findAccount(id, usuario);
+                }else{
+                    throw new Exception("La cuenta que se quiere consultar no existe o se encuentra inactiva");
+                }
+            }else{
+                throw new Exception("El usuario no existe");
+            }
+        }catch (Exception e){
+            String error = "Ocurrio un error al obtener la informacion de la cuenta: " + e.getMessage();
+            log.error(error);
+            System.out.println(error);
+        }
+
         return response;
     }
 }

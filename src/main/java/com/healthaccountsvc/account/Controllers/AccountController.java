@@ -1,15 +1,13 @@
 package com.healthaccountsvc.account.Controllers;
 
-import com.healthaccountsvc.account.DTO.AccountInfoAddDTO;
-import com.healthaccountsvc.account.DTO.AccountInfoUpdateDTO;
-import com.healthaccountsvc.account.DTO.ApiResponseDTO;
-import com.healthaccountsvc.account.DTO.ResponseBasicDTO;
+import com.healthaccountsvc.account.DTO.*;
 import com.healthaccountsvc.account.Services.AccountService;
 import com.healthaccountsvc.account.Util.Meta;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -60,6 +58,46 @@ public class AccountController {
             return new ApiResponseDTO(metaNotFound, response.getMensaje());
         }else{
             return new ApiResponseDTO(metaServerError, response.getMensaje());
+        }
+    }
+
+    @PostMapping("/cuenta/transferencia")
+    public ApiResponseDTO crearTransferencia(@RequestBody @Valid AccountInfoTransferDTO accountInfo){
+        ResponseBasicDTO response = accountService.addTransferenciaCuenta(accountInfo);
+        if(response.getStatus() == 1){
+            return new ApiResponseDTO(metaOk, response.getMensaje());
+        }else if(response.getStatus() == 0){
+            return new ApiResponseDTO(metaNotFound, response.getMensaje());
+        }else{
+            return new ApiResponseDTO(metaServerError, response.getMensaje());
+        }
+    }
+
+    @GetMapping("/cuenta/all/{usuario}")
+    public ApiResponseDTO obtenerTodasCuentas(@PathVariable(name = "usuario") int usuario){
+        try{
+            List<GetAccountDataProjection> infoAccount = accountService.obtenerAllCuentas(usuario);
+            if(!infoAccount.isEmpty()){
+                return new ApiResponseDTO(metaOk, infoAccount);
+            }else{
+                return new ApiResponseDTO(metaNotFound, "No existen cuentas asociadas al usuario o el usuario no existe");
+            }
+        }catch (Exception e){
+            return new ApiResponseDTO(metaServerError, "Ocurrió un error al obtener la lista de cuentas del usuario: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/cuenta/single/{id}/{usuario}")
+    public ApiResponseDTO obtenerCuentaInfo(@PathVariable(name = "id") int id, @PathVariable(name = "usuario") int usuario){
+        try{
+           List<GetAccountDataProjection> infoAccount = accountService.obtenerAccount(id, usuario);
+           if(!infoAccount.isEmpty()){
+               return new ApiResponseDTO(metaOk, infoAccount.get(0));
+           }else{
+               return new ApiResponseDTO(metaNotFound, "No existen cuentas asociadas al usuario o el usuario no existe");
+           }
+        }catch(Exception e){
+            return new ApiResponseDTO(metaServerError, "Ocurrio un error al obtener informacion de la cuenta: " + e.getMessage());
         }
     }
 }
