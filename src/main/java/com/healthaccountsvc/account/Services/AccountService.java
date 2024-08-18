@@ -14,4 +14,5 @@ public interface AccountService {
     ResponseBasicDTO addTransferenciaCuenta(AccountInfoTransferDTO accountInfo);
     List<GetAccountDataProjection> obtenerAllCuentas(int usuario);
     List<GetAccountDataProjection> obtenerAccount(int id, int usuario);
+    List<GetTransferHistoryDataProjection> obtenerHisTransferencias(int usuario);
 }

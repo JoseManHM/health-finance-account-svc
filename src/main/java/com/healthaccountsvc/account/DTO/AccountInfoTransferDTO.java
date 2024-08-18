@@ -27,4 +27,7 @@ public class AccountInfoTransferDTO {
     @NotNull
     @PositiveOrZero
     private int idUsuario;
+    @JsonProperty("descripcion")
+    @NotNull
+    private String descripcion;
 }

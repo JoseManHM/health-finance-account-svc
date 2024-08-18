@@ -100,4 +100,18 @@ public class AccountController {
             return new ApiResponseDTO(metaServerError, "Ocurrio un error al obtener informacion de la cuenta: " + e.getMessage());
         }
     }
+
+    @GetMapping("/cuenta/transferencia/all/{id}")
+    public ApiResponseDTO obtenerTransferenciaHistAll(@PathVariable(name = "id") int id){
+        try{
+            List<GetTransferHistoryDataProjection> infoTransfer = accountService.obtenerHisTransferencias(id);
+            if(!infoTransfer.isEmpty()){
+                return new ApiResponseDTO(metaOk, infoTransfer);
+            }else{
+                return new ApiResponseDTO(metaNotFound, "No hay transferencias realizadas con ese usuario");
+            }
+        }catch (Exception e){
+            return new ApiResponseDTO(metaServerError, "Ocurrio un error al obtener el historial de transferencias: " + e.getMessage());
+        }
+    }
 }

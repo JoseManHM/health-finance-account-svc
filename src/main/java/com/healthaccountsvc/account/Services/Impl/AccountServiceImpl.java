@@ -4,9 +4,9 @@ import com.healthaccountsvc.account.DTO.*;
 import com.healthaccountsvc.account.Entities.Cuentas;
 import com.healthaccountsvc.account.Entities.Usuarios;
 import com.healthaccountsvc.account.Repository.AccountRepository;
+import com.healthaccountsvc.account.Repository.TransferenciasHistRepository;
 import com.healthaccountsvc.account.Repository.UserRepository;
 import com.healthaccountsvc.account.Services.AccountService;
-import org.apache.coyote.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +22,8 @@ public class AccountServiceImpl implements AccountService {
     AccountRepository accountRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    TransferenciasHistRepository transferenciasHistRepository;
 
     @Override
     public String pruebaConexion(){
@@ -129,6 +131,7 @@ public class AccountServiceImpl implements AccountService {
                     if(accountRepository.existsAccountActive(accountInfo.getIdDestino(), accountInfo.getIdUsuario())){
                         accountRepository.restarCantidadCuenta(accountInfo.getMonto(), accountInfo.getIdOrigen());
                         accountRepository.sumarCantidadCuenta(accountInfo.getMonto(), accountInfo.getIdDestino());
+                        transferenciasHistRepository.addTransferenciaHist(accountInfo.getDescripcion(), accountInfo.getIdOrigen(), accountInfo.getIdDestino(), accountInfo.getIdUsuario(), accountInfo.getMonto());
                         response.setStatus(1);
                         response.setMensaje("Se ha realizado correctamente las transferencias entre cuentas");
                     }else{
@@ -189,6 +192,23 @@ public class AccountServiceImpl implements AccountService {
             System.out.println(error);
         }
 
+        return response;
+    }
+
+    @Override
+    public List<GetTransferHistoryDataProjection> obtenerHisTransferencias(int usuario){
+        List<GetTransferHistoryDataProjection> response = new ArrayList<>();
+        try{
+            if(userRepository.existsById(usuario)){
+                response = transferenciasHistRepository.getHistoryTransferData(usuario);
+            }else{
+                throw new Exception("El usuario no existe");
+            }
+        }catch (Exception e){
+            String error = "Ocurrio un error al obtener el historial de transferencias: " + e.getMessage();
+            log.error(error);
+            System.out.println(error);
+        }
         return response;
     }
 }
