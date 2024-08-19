@@ -7,6 +7,7 @@ import com.healthaccountsvc.account.Repository.AccountRepository;
 import com.healthaccountsvc.account.Repository.TransferenciasHistRepository;
 import com.healthaccountsvc.account.Repository.UserRepository;
 import com.healthaccountsvc.account.Services.AccountService;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -208,6 +209,42 @@ public class AccountServiceImpl implements AccountService {
             String error = "Ocurrio un error al obtener el historial de transferencias: " + e.getMessage();
             log.error(error);
             System.out.println(error);
+        }
+        return response;
+    }
+
+    @Override
+    @Transactional
+    public ResponseBasicDTO editarTransferenciaCuenta(AccountInfoTransferEditDTO accountInfo){
+        ResponseBasicDTO response = new ResponseBasicDTO();
+        try{
+            if(userRepository.existsById(accountInfo.getIdUsuario())){
+                if(accountRepository.existsAccountActive(accountInfo.getIdOrigen(), accountInfo.getIdUsuario()) && accountRepository.existsAccountActive(accountInfo.getIdDestino(), accountInfo.getIdUsuario())){
+                    //Regresar cuentas antes de transferencia
+                    GetTransferInfoProjectionDTO transferOriginal = transferenciasHistRepository.getInfoTransferHistory(accountInfo.getId());
+                    accountRepository.sumarCantidadCuenta(transferOriginal.getMonto(), transferOriginal.getIdOrigen());
+                    accountRepository.restarCantidadCuenta(transferOriginal.getMonto(), transferOriginal.getIdDestino());
+                    //Realizar nuevo ajuste a cuentas (transferencias)
+                    accountRepository.restarCantidadCuenta(accountInfo.getMonto(), accountInfo.getIdOrigen());
+                    accountRepository.sumarCantidadCuenta(accountInfo.getMonto(), accountInfo.getIdDestino());
+                    //Actualizar historial de transferencias
+                    transferenciasHistRepository.editTransferenciaHist(accountInfo.getDescripcion(), accountInfo.getIdOrigen(), accountInfo.getIdDestino(), accountInfo.getMonto(), accountInfo.getId(), accountInfo.getIdUsuario());
+                    response.setStatus(1);
+                    response.setMensaje("Se ha modificado correctamente la transferencia");
+                }else{
+                    response.setStatus(0);
+                    response.setMensaje("La cuenta origen y/o destino de la transferencia que se quiere editar no existe");
+                }
+            }else{
+                response.setStatus(0);
+                response.setMensaje("El usuario asociado a la transferencia que se quiere actualizar no existe");
+            }
+        }catch (Exception e){
+            String error = "Ocurrio un error al realizar la modificacion de la transferencia: " + e.getMessage();
+            log.error(error);
+            System.out.println(error);
+            response.setStatus(-1);
+            response.setMensaje(error);
         }
         return response;
     }

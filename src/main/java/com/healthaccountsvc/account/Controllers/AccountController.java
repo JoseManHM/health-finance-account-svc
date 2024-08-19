@@ -114,4 +114,16 @@ public class AccountController {
             return new ApiResponseDTO(metaServerError, "Ocurrio un error al obtener el historial de transferencias: " + e.getMessage());
         }
     }
+
+    @PutMapping("/cuenta/transferencia")
+    public ApiResponseDTO editarTransferencia(@RequestBody @Valid AccountInfoTransferEditDTO accountInfo){
+        ResponseBasicDTO response = accountService.editarTransferenciaCuenta(accountInfo);
+        if(response.getStatus() == 1){
+            return new ApiResponseDTO(metaOk, response.getMensaje());
+        }else if(response.getStatus() == 0){
+            return new ApiResponseDTO(metaNotFound, response.getMensaje());
+        }else{
+            return new ApiResponseDTO(metaServerError, response.getMensaje());
+        }
+    }
 }
