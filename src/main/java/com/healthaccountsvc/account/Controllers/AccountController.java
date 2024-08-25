@@ -126,4 +126,16 @@ public class AccountController {
             return new ApiResponseDTO(metaServerError, response.getMensaje());
         }
     }
+
+    @DeleteMapping("/cuenta/transferencia/{id}/{usuario}")
+    public ApiResponseDTO eliminarTransferencia(@PathVariable(name = "id") int id, @PathVariable(name = "usuario") int usuario){
+        ResponseBasicDTO responseDelete = accountService.eliminarTransferencia(id, usuario);
+        if(responseDelete.getStatus() == 1){
+            return new ApiResponseDTO(metaOk, responseDelete.getMensaje());
+        }else if(responseDelete.getStatus() == 0){
+            return new ApiResponseDTO(metaNotFound, responseDelete.getMensaje());
+        }else{
+            return new ApiResponseDTO(metaServerError, responseDelete.getMensaje());
+        }
+    }
 }

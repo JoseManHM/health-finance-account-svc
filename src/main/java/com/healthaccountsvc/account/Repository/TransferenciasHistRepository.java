@@ -29,4 +29,12 @@ public interface TransferenciasHistRepository extends JpaRepository<Transferenci
     @Modifying(clearAutomatically = true)
     @Query(value = "UPDATE transferencias_hist SET descripcion = :descripcion, id_origen = :origen, id_destino = :destino, monto = :monto WHERE id = :id AND id_usuario = :usuario", nativeQuery = true)
     void editTransferenciaHist(@Param("descripcion") String descripcion, @Param("origen") int origen, @Param("destino") int destino, @Param("monto") float monto, @Param("id") int id, @Param("usuario") int usuario);
+
+    @Query(value = "SELECT CASE WHEN count(th) > 0 THEN true ELSE false END FROM transferencias_hist th WHERE id = :id AND id_usuario = :usuario AND activo = 0", nativeQuery = true)
+    boolean existsTransferActive(@Param("id") int id, @Param("usuario") int usuario);
+
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query(value = "UPDATE transferencias_hist SET activo = 1 WHERE id = :id AND id_usuario = :usuario", nativeQuery = true)
+    void eliminarTransferencia(@Param("id") int id, @Param("usuario") int usuario);
 }

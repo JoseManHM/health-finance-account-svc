@@ -248,4 +248,32 @@ public class AccountServiceImpl implements AccountService {
         }
         return response;
     }
+
+    @Override
+    @Transactional
+    public ResponseBasicDTO eliminarTransferencia(int id, int usuario){
+        ResponseBasicDTO response = new ResponseBasicDTO();
+        try{
+            if(transferenciasHistRepository.existsTransferActive(id, usuario)){
+                GetTransferInfoProjectionDTO transferenciaData = transferenciasHistRepository.getInfoTransferHistory(id);
+                //Regresar cuentas a estado original
+                accountRepository.sumarCantidadCuenta(transferenciaData.getMonto(), transferenciaData.getIdOrigen());
+                accountRepository.restarCantidadCuenta(transferenciaData.getMonto(), transferenciaData.getIdDestino());
+                //Eliminar transferencia del historial
+                transferenciasHistRepository.eliminarTransferencia(id, usuario);
+                response.setStatus(1);
+                response.setMensaje("La transferencia se ha eliminado correctamente");
+            }else{
+                response.setStatus(0);
+                response.setMensaje("La transferencia que se quiere eliminar no existe o el usuario asociado a la transferencia no existe");
+            }
+        }catch (Exception e){
+            String error = "Ocurrio un error al eliminar la transferencia: " + e.getMessage();
+            log.error(error);
+            System.out.println(error);
+            response.setStatus(-1);
+            response.setMensaje(error);
+        }
+        return response;
+    }
 }
